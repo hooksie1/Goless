@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -112,6 +113,7 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return ctrl.Result{}, nil
 		}
 		r.Recorder.Event(&function, "Normal", "Updated", "Configmap updated")
+		function.Status.Status = "Update"
 	}
 
 	// Service Section
@@ -137,11 +139,14 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	if !errors.IsNotFound(err) && function.GetServerPort32() != existingSvc.Spec.Ports[0].Port {
+		svc.ResourceVersion = existingSvc.ResourceVersion
 		if err := r.Update(ctx, &svc); err != nil {
+			fmt.Println(err)
 			log.Error(err, "unable to update service port")
 			return ctrl.Result{}, err
 		}
 		r.Recorder.Event(&function, "Normal", "Updated", "Service updated")
+		function.Status.Status = "Update"
 	}
 
 	// Deployment section
@@ -167,7 +172,8 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		r.Recorder.Event(&function, "Normal", "Created", "Deployment created")
 	}
 
-	if &function.Status.Status == &FnUpdate {
+	if function.Status.Status == FnUpdate {
+		fmt.Println("in update")
 		now := time.Now()
 		dep.Spec.Template.Annotations = map[string]string{
 			"timestamp": now.String(),
