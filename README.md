@@ -71,6 +71,10 @@ spec:
     }
 ```
 
+### Metrics
+
+Out of the box, Goless returns Prometheus metrics at `/metrics` with the number of function invocations, the number of requests per method, and number of errors per HTTP type.
+
 ## Removal
 
 ### CRDs
