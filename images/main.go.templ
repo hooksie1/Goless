@@ -1,0 +1,65 @@
+package main
+
+import (
+	"fmt"
+	"goless-builder/handlers"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+var (
+	totalInvocations = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "total_invocations",
+		Help: "The total number of function invocations",
+	})
+
+	byMethod = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "total_by_method",
+		Help: "The requests by method",
+	},
+		[]string{
+			"method",
+		})
+)
+
+func getHealth(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+// logger logs the endpoint requested and times how long the request takes.
+func logger(inner http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		totalInvocations.Inc()
+		byMethod.WithLabelValues(r.Method).Inc()
+
+		inner.ServeHTTP(w, r)
+
+		log.Printf(
+			"%s %s %s",
+			r.Method,
+			r.RequestURI,
+			time.Since(start),
+		)
+	})
+}
+
+func main() {
+	port := "8080"
+	if os.Getenv("SERVER_PORT") != "" {
+		port = os.Getenv("SERVER_PORT")
+	}
+
+	http.Handle("/", logger(handlers.Handler))
+	http.HandleFunc("/healthz", getHealth)
+	http.Handle("/metrics", promhttp.Handler())
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+}

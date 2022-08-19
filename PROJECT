@@ -1,0 +1,16 @@
+domain: goless.io
+layout:
+- go.kubebuilder.io/v4-alpha
+projectName: goless
+repo: github.com/hooksie1/goless
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: goless.io
+  group: goless
+  kind: Function
+  path: github.com/hooksie1/goless/api/v1beta1
+  version: v1beta1
+version: "3"
