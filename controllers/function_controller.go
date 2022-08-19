@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -172,7 +171,6 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	if function.Status.Status == FnUpdate {
-		fmt.Println("in update")
 		now := time.Now()
 		dep.Spec.Template.Annotations = map[string]string{
 			"timestamp": now.String(),
