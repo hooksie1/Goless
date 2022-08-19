@@ -141,7 +141,6 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	if !errors.IsNotFound(err) && function.GetServerPort32() != existingSvc.Spec.Ports[0].Port {
 		svc.ResourceVersion = existingSvc.ResourceVersion
 		if err := r.Update(ctx, &svc); err != nil {
-			fmt.Println(err)
 			log.Error(err, "unable to update service port")
 			return ctrl.Result{}, err
 		}
