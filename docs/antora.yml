@@ -1,0 +1,5 @@
+name: goless
+title: Goless
+version: main
+nav:
+  - modules/ROOT/nav.adoc

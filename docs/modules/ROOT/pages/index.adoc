@@ -1,0 +1,25 @@
+== Overview
+
+Goless is a serverless framework for Go functions on Kubernetes.
+
+=== Deployment
+
+You can use the Makefile, however if you have a recent version of `kubectl` it will be easier.
+
+==== CRD setup
+
+`kubectl kustomize config/crd | kubectl apply -f -`
+
+==== Controller Deployment
+
+`kubectl kustomize config/default | kubectl apply -f -`
+
+=== Removal
+
+==== CRDs
+
+`kubectl kustomize config/crd | kubectl delete -f -`
+
+==== Operator
+
+`kubectl kustomize config/default | kubectl delete -f -`

@@ -1,0 +1,62 @@
+== Function Deployment
+
+A sample function is in `config/samples/sample.yaml`
+
+
+A Goless function looks like this:
+
+[source,yaml]
+----
+apiVersion: goless.io/v1beta1
+kind: Function
+metadata:
+  name: function-example
+spec:
+  service: "example"
+  serverPort: 9000
+  replicas: 1
+  function: |
+    package handlers
+    import (
+      "net/http"
+    )
+    func Handler(w http.ResponseWriter, r *http.Request) {
+      w.Write([]byte("Hey this example works!"))
+    }
+----
+
+Since this is the default Go HTTP package we can include middleware as well:
+
+[source,yaml]
+----
+apiVersion: goless.io/v1beta1
+kind: Function
+metadata:
+  name: function-example
+spec:
+  service: "example"
+  serverPort: 9000
+  replicas: 1
+  function: |
+    package handlers
+    import (
+      "net/http"
+    )
+
+    func Handler(w http.ResponseWriter, r *http.Request) {
+      w.Header().Add("foo", "bar")
+
+      Foo().ServeHTTP(w, r)
+
+    }
+
+    func Foo() http.HandlerFunc {
+      return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("in handler"))
+      })
+    }
+----
+
+=== Metrics
+
+Out of the box, Goless returns Prometheus metrics at `/metrics` with the number of function invocations, the number of requests per method, and number of errors per HTTP type.
